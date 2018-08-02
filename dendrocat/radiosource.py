@@ -75,12 +75,13 @@ class RadioSource:
         Supported Telescopes
         ----------
         ALMA
+        EVLA
         """
         
         try:
             self.telescope = self.header['TELESCOP']
             
-            if self.telescope == 'ALMA':
+            if self.telescope == 'ALMA' or 'EVLA':
                 
                 # Get the frequency, either stored in CRVAL3 or CRVAL4
                 self.nu = 'UNKNOWN'
