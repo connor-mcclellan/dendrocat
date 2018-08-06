@@ -4,6 +4,7 @@ import astropy.units as u
 from astropy.table import MaskedColumn, Column, vstack, Table
 from astropy.utils.console import ProgressBar
 import matplotlib.pyplot as plt
+import matplotlib
 from collections import OrderedDict
 from copy import deepcopy
 import warnings
@@ -331,19 +332,20 @@ def plot_sed(row, catalog, aperture=None, alphas=None, peak=False, log=True,
         if 'GHz' in col:
             freq_id = col.split('_')[0]
             if row.mask[col][0] == False:
-                freq_ids.append(freq_id)
                 if apname in col and method in col:
+                    freq_ids.append(freq_id)
                     fluxcols.append(col)
                 if 'annulus' in col and 'rms' in col:
                     errcols.append(col)
                 if 'ellipse' in col and 'err' in col:
                     errcols.append(col)
     
-    freq_ids = list(OrderedDict.fromkeys(freq_ids))
-    fluxcols = list(OrderedDict.fromkeys(fluxcols))
-    errcols = list(OrderedDict.fromkeys(errcols))
-    
     nus = [float(s.split('GHz')[0]) for s in freq_ids]
+    nus, sort = [list(s) for s in zip(*sorted(zip(nus, range(len(nus)))))]
+    freq_ids = np.asarray(freq_ids, dtype=object)[sort]
+    fluxcols = np.asarray(fluxcols, dtype=object)[sort]
+    errcols = np.asarray(errcols, dtype=object)[sort]
+    
     fluxes = [row[col][0] for col in fluxcols]
     errs = [row[errcol][0] for errcol in errcols]
     
@@ -351,10 +353,14 @@ def plot_sed(row, catalog, aperture=None, alphas=None, peak=False, log=True,
     ys = []
     
     if alphas:
-        k = int(np.floor(len(fluxes)/2))
-        for a in alphas:
-            constant = fluxes[k]/(nus[k]**a)
-            ys.append(constant*(x**a))
+        if len(fluxes) <= 2:
+            for a in alphas:
+                constant = fluxes[-1]/(nus[-1]**a)
+                ys.append(constant*(x**a))
+        else:
+            for a in alphas:
+                constant = np.median(fluxes)/(np.median(nus)**a)
+                ys.append(constant*(x**a))
     
     fig, ax = plt.subplots()
     
@@ -388,12 +394,15 @@ def plot_sed(row, catalog, aperture=None, alphas=None, peak=False, log=True,
         else:
             ax.set_ylabel('Flux (Jy)')
     
-    ax.set_title('Spectral Energy Distribution for Source {}'
-                 .format(row['_name'][0]))
-                 
+    ax.set_title('Spectral Energy Distribution for Source {}'.format(row['_name'][0]))
+    ax.xaxis.set_major_locator(matplotlib.ticker.FixedLocator([int(nu) for nu in nus]))                
+    ax.xaxis.set_major_formatter(matplotlib.ticker.FixedFormatter(['{:.1f} GHz'.format(nu) for nu in nus]))
+    ax.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
+    plt.xticks(rotation=-90)
     handles, labels = plt.gca().get_legend_handles_labels()
     label = OrderedDict(zip(labels, handles))
     ax.legend(label.values(), label.keys())
+    plt.tight_layout()
     
     if outfile is not None:
         ax.savefig(outfile, dpi=300, bbox_inches='tight')
