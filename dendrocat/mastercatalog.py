@@ -425,7 +425,6 @@ class MasterCatalog:
             
     def plotsedgrid(self, row, alphas=None, path=None):
         row = Table(row, masked=True)
-        apname = 'ellipse'
         method = 'sum'
         
         rsobjs = []
@@ -444,12 +443,12 @@ class MasterCatalog:
             if 'GHz' in col:
                 freq_id = col.split('_')[0]
                 if row.mask[col][0] == False:
-                    if apname in col and method in col:
+                    if ('ellipse' in col or 'Ellipse' in col) and method in col:
                         freq_ids.append(freq_id)
                         fluxcols.append(col)
-                    if 'annulus' in col and 'rms' in col:
+                    if ('annulus' in col or 'Annulus' in col) and 'rms' in col:
                         errcols.append(col)
-                    if 'ellipse' in col and 'err' in col:
+                    if ('ellipse' in col or 'Ellipse' in col) and 'err' in col:
                         errcols.append(col)
                         
         freq_ids = list(OrderedDict.fromkeys(freq_ids))

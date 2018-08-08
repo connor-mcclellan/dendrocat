@@ -92,8 +92,15 @@ class RadioSource:
                 
                 # Create a frequency identifier from nu
                 if not self.freq_id:
-                    self.freq_id = ('{:.1f}'.format(self.nu.to(u.GHz)).replace(' ', ''))
-                self.set_metadata()
+                    try:
+                        self.freq_id = ('{:.1f}'.format(self.nu.to(u.GHz)).replace(' ', ''))
+                        self.set_metadata()
+                    except AttributeError:
+                        print('Could not extract frequency from fits header. '
+                              'Please manually set the following instance att'
+                              'ributes :')
+                        print(' nu\n', 'freq_id\n', 'metadata\n')
+                        self.freq_id = ('UNKNOWN')
                 
             else:
                 print('FITS info collection not currently supported for ' \
