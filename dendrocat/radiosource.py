@@ -197,14 +197,10 @@ class RadioSource:
                 dendrogram = self.to_dendrogram()
 
         cat = pp_catalog(dendrogram.leaves, self.metadata)
-        cat.add_column(Column(length=len(cat), shape=20, dtype=str),
-                       name='_name')
+        strarr=[str('{:.0f}{:04d}'.format(np.round(self.nu.to(u.GHz).value), idx)) for idx in cat['_idx']]  
+        cat.add_column(Column(data=strarr), name='_name')
         cat.add_column(Column(data=range(len(cat))), name='_index')
         cat = cat[sorted(cat.colnames)]
-
-        for i, idx in enumerate(cat['_idx']):
-            cat['_name'][i] = str('{:.0f}{:03d}'.format(
-                                       np.round(self.nu.to(u.GHz).value), idx))
 
         try:
             cat['major_sigma'] = cat['major_sigma']*np.sqrt(8*np.log(2))
