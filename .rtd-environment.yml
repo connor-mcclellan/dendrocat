@@ -1,4 +1,4 @@
-name: rsprocess
+name: dendrocat
 
 channels:
     - astropy
@@ -6,11 +6,11 @@ channels:
     - conda-forge
 
 dependencies:
-    - python=3
-    - astropy
+    - python=3.11
+    - astropy>=4.0
     - Cython
     - matplotlib
-    - numpy
+    - numpy>=1.19
     - sphinx-astropy
     - radio-beam
     - regions

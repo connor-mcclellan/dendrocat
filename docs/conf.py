@@ -28,6 +28,7 @@
 import datetime
 import os
 import sys
+from importlib import metadata
 
 try:
     import astropy_helpers
@@ -110,13 +111,15 @@ copyright = '{0}, {1}'.format(
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-__import__(setup_cfg['package_name'])
-package = sys.modules[setup_cfg['package_name']]
-
-# The short X.Y version.
-version = package.__version__.split('-', 1)[0]
-# The full version, including alpha/beta/rc tags.
-release = package.__version__
+try:
+    # Try to get version from installed package metadata
+    package_info = metadata.metadata(setup_cfg['package_name'])
+    version = package_info["Version"].split('-', 1)[0]
+    release = package_info["Version"]
+except (ImportError, metadata.PackageNotFoundError):
+    # Fallback if package isn't installed yet
+    version = 'latest'
+    release = 'latest'
 
 
 # -- Options for HTML output --------------------------------------------------
@@ -193,12 +196,9 @@ if eval(setup_cfg.get('edit_on_github')):
     extensions += ['sphinx_astropy.ext.edit_on_github']
     extensions += ['sphinx.ext.intersphinx']
 
-    versionmod = __import__(setup_cfg['package_name'] + '.version')
     edit_on_github_project = setup_cfg['github_project']
-    if versionmod.version.release:
-        edit_on_github_branch = "v" + versionmod.version.version
-    else:
-        edit_on_github_branch = "master"
+    # For simplicity, always use master branch for edit links
+    edit_on_github_branch = "master"
 
     edit_on_github_source_root = ""
     edit_on_github_doc_root = "docs"

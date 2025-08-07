@@ -10,7 +10,13 @@ from ._astropy_init import *
 # This is the same check as the one at the top of setup.py
 import sys
 
-__minimum_python_version__ = "3.6"
+__minimum_python_version__ = "3.8"
+
+# Version information
+try:
+    from ._version import version as __version__
+except ImportError:
+    __version__ = "0.0.dev0"
 
 class UnsupportedPythonError(Exception):
     pass
@@ -23,4 +29,3 @@ if not _ASTROPY_SETUP_:
     from .mastercatalog import MasterCatalog
     from .radiosource import RadioSource
     from .utils import ucheck
-
